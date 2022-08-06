@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit75abf91b043ee277fde4b714cbd64ac8
 {
+    public static $files = array (
+        'c0489cfc7f8a51710776265120372860' => __DIR__ . '/../..' . '/config.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'A' => 
         array (
@@ -16,7 +20,7 @@ class ComposerStaticInit75abf91b043ee277fde4b714cbd64ac8
     public static $prefixDirsPsr4 = array (
         'App\\' => 
         array (
-            0 => __DIR__ . '/..' . '/tayouza/class',
+            0 => __DIR__ . '/../..' . '/App',
         ),
     );
 
