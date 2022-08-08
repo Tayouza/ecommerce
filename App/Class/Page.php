@@ -26,9 +26,9 @@ class Page{
 
         $this->tpl = new Tpl;
 
-        $this->setData($this->options['data']);
+        $this->setData($this->options);
 
-        $this->tpl->draw("header");
+        $this->tpl->draw("template".DIRECTORY_SEPARATOR."header");
     }
 
     private function setData($data = array())
@@ -47,6 +47,6 @@ class Page{
 
     public function __destruct()
     {
-        $this->tpl->draw("footer");
+        $this->tpl->draw("template".DIRECTORY_SEPARATOR."footer");
     }
 }

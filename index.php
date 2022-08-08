@@ -11,13 +11,14 @@ $app->config('debug', true);
 
 $app->get('/', function () {
     $options = array(
-        "data" => array(
-            "title" => "Ecommerce",
-            "h1" => "hello"
-        )
     );
     $page = new Page($options);
     $page->setTpl("index");
+});
+
+$app->get('/carrinho', function(){
+    $page = new Page();
+    $page->setTpl('carrinho');
 });
 
 $app->run();
