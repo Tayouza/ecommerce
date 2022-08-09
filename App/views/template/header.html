@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hcode Store</title>
+    <title>Tayouza Store</title>
     
     <!-- Google Fonts -->
     <link href='https://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet' type='text/css'>
@@ -41,9 +41,9 @@
                     <div class="user-menu">
                         <ul>
                             <li><a href="#"><i class="fa fa-user"></i> Minha Conta</a></li>
-                            <li><a href="#"><i class="fa fa-heart"></i> Lista de Desejos</a></li>
-                            <li><a href="#"><i class="fa fa-shopping-cart"></i> Meu Carrinho</a></li>
-                            <li><a href="#"><i class="fa fa-lock"></i> Login</a></li>
+                            <li><a href="/lista-produtos"><i class="fa fa-heart"></i> Lista de Desejos</a></li>
+                            <li><a href="/carrinho"><i class="fa fa-shopping-cart"></i> Meu Carrinho</a></li>
+                            <li><a href="/login"><i class="fa fa-lock"></i> Login</a></li>
                         </ul>
                     </div>
                 </div>
@@ -105,9 +105,9 @@
                 </div> 
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li class="active"><a href="#">Home</a></li>
-                        <li><a href="#">Produtos</a></li>
-                        <li><a href="#">Carrinho</a></li>
+                        <li id="home"><a href="/">Home</a></li>
+                        <li id="lista-produtos"><a href="/lista-produtos">Produtos</a></li>
+                        <li id="carrinho"><a href="/carrinho">Carrinho</a></li>
                     </ul>
                 </div>  
             </div>

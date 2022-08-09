@@ -1,6 +1,6 @@
 <?php
 
 const   HOSTNAME = "127.0.0.1",
-        USERNAME = "root",
-        PASSWORD = "",
+        DBUSER = "root",
+        DBPASS = "",
         DBNAME = "db_ecommerce";
