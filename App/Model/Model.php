@@ -17,8 +17,20 @@ class Model
                 break;
 
             case "set":
-                $this->values[$fieldName] = $args[0];
+                $this->values[$fieldName] = $args;
                 break;
         }
+    }
+
+    public function setData($data = array())
+    {
+        foreach($data as $key => $value){
+            $this->{"set".$key}($value);
+        }
+    }
+
+    public function getValues()
+    {
+        return $this->values;
     }
 }
