@@ -30,7 +30,12 @@ class Page{
 
         $this->setData($this->options);
 
-        if($this->options['header'] === true) $this->tpl->draw("template".DIRECTORY_SEPARATOR."header");
+        if($this->options['header'] === true){
+            if(isset($this->options['header-data']))
+                $this->setTpl("template".DIRECTORY_SEPARATOR."header", $this->options['header-data']);
+            else
+                $this->setTpl("template".DIRECTORY_SEPARATOR."header");
+        }
     }
 
     private function setData($data = array())

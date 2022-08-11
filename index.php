@@ -8,12 +8,18 @@ use App\Class\Page;
 use App\Class\PageAdmin;
 use App\Model\User;
 
-$c = new Container(); //Create Your container
+$configContainer = [
+    'settings' => [
+        'displayErrorDetails' => true
+    ]
+];
+
+$c = new Container($configContainer); //Create Your container
 
 //Override the default Not Found Handler before creating App
 $c['notFoundHandler'] = function ($c) {
     return function ($request, $response) use ($c) {
-        $file =$_SERVER['DOCUMENT_ROOT']."/App/views/404.html";
+        $file = $_SERVER['DOCUMENT_ROOT'] . "/App/views/404.html";
         return $response->withStatus(404)
             ->withHeader('Content-Type', 'text/html')
             ->write(file_get_contents($file));
@@ -59,8 +65,14 @@ $app->get("/lista-produtos", function () {
 
 $app->get("/admin", function () {
     User::verifyLogin();
-    $page = new PageAdmin();
-    $page->setTpl('index');
+    
+    $page = new PageAdmin(array(
+        "header-data" => array(
+            "user"=>$_SESSION['user']
+        )
+    ));
+
+    $page->setTpl("index");
 });
 
 $app->get("/admin/login", function () {
@@ -72,20 +84,124 @@ $app->get("/admin/login", function () {
 });
 
 $app->post("/admin/login", function () {
-    try{
+    try {
         User::login($_POST['login'], $_POST['password']);
-    }catch(Exception $e){
-
+        header("Location: /admin");
+        exit;
+    } catch (Exception $e) {
+        header("Location: /admin/login");
+        exit;
+        //echo $e->getMessage();
     }
-    header("Location: /admin");
-    exit;
 });
 
-$app->get("/admin/logout", function(){
+$app->get("/admin/logout", function () {
     User::logout();
 
     header("Location: /admin/login");
     exit;
+});
+
+$app->get("/admin/users", function () {
+    User::verifyLogin();
+
+    $users = User::listAll();
+
+    $page = new PageAdmin(array(
+        "header-data" => array(
+            "user"=>$_SESSION['user']
+        )
+    ));
+
+    $page->setTpl("users", array(
+        "users" => $users
+    ));
+});
+
+$app->get("/admin/users/create", function () {
+    User::verifyLogin();
+
+    $page = new PageAdmin(array(
+        "header-data" => array(
+            "user"=>$_SESSION['user']
+        )
+    ));
+
+    $page->setTpl("users-create");
+});
+
+$app->post("/admin/users/create", function () {
+
+    User::verifyLogin();
+
+    $user = new User();
+
+    $_POST['inadmin'] = (isset($_POST['inadmin'])) ? 1 : 0;
+
+    $user->setData($_POST);
+
+    $user->save();
+
+    header("Location: /admin/users");
+    exit;
+});
+
+$app->get("/admin/users/{iduser}", function ($req, $res, $args) {
+    User::verifyLogin();
+
+    $iduser = $args['iduser'];
+
+    $user = new User();
+
+    $user->get((int) $iduser);
+
+    $page = new PageAdmin(array(
+        "header-data" => array(
+            "user"=>$_SESSION['user']
+        )
+    ));
+
+    $page->setTpl("users-update", array(
+        "user"=>$user->getValues()
+    ));
+});
+
+$app->post("/admin/users/{iduser}", function ($req, $res, $args) {
+
+    User::verifyLogin();
+
+    $iduser = $args['iduser'];
+
+    $_POST['inadmin'] = (isset($_POST['inadmin'])) ? 1 : 0;
+
+    $user = new User();
+
+    $user->get((int) $iduser);
+
+    $user->setData($_POST);
+
+    $user->update();
+
+    header("Location: /admin/users");
+    exit;
+
+});
+
+$app->get("/admin/users/delete/{iduser}", function ($req, $res, $args) {
+
+    User::verifyLogin();
+
+    $iduser = $args['iduser'];
+
+    $user = new User();
+
+    $user->get((int) $iduser);
+
+    $user->delete();
+
+    header("Location: /admin/users");
+    exit;
+
 });
 
 $app->run();
