@@ -2,6 +2,8 @@
 session_start();
 require_once("vendor/autoload.php");
 
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 use Slim\App as Slim;
 use Slim\Container;
 use App\Class\Page;
@@ -28,42 +30,42 @@ $c['notFoundHandler'] = function ($c) {
 
 $app = new Slim($c);
 
-$app->get('/', function () {
+$app->get('/', function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl("index");
 });
 
-$app->get('/carrinho', function () {
+$app->get('/carrinho', function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl('carrinho');
 });
 
-$app->get("/detalhes-produto", function () {
+$app->get("/detalhes-produto", function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl('detalhes-produto');
 });
 
-$app->get("/login", function () {
+$app->get("/login", function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl('login');
 });
 
-$app->get("/esqueci", function () {
+$app->get("/esqueci", function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl('esqueci');
 });
 
-$app->get("/pagamento", function () {
+$app->get("/pagamento", function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl('pagamento');
 });
 
-$app->get("/lista-produtos", function () {
+$app->get("/lista-produtos", function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl('lista-produtos');
 });
 
-$app->get("/admin", function () {
+$app->get("/admin", function (Request $req, Response $res, $args) {
     User::verifyLogin();
     
     $page = new PageAdmin(array(
@@ -75,15 +77,16 @@ $app->get("/admin", function () {
     $page->setTpl("index");
 });
 
-$app->get("/admin/login", function () {
+$app->get("/admin/login", function (Request $req, Response $res, $args) {
     $page = new PageAdmin(array(
         'header' => false,
         'footer' => false
     ));
     $page->setTpl('login');
+    return $res;
 });
 
-$app->post("/admin/login", function () {
+$app->post("/admin/login", function (Request $req, Response $res, $args) {
     try {
         User::login($_POST['login'], $_POST['password']);
         header("Location: /admin");
@@ -91,18 +94,17 @@ $app->post("/admin/login", function () {
     } catch (Exception $e) {
         header("Location: /admin/login");
         exit;
-        //echo $e->getMessage();
     }
 });
 
-$app->get("/admin/logout", function () {
+$app->get("/admin/logout", function (Request $req, Response $res, $args) {
     User::logout();
 
     header("Location: /admin/login");
     exit;
 });
 
-$app->get("/admin/users", function () {
+$app->get("/admin/users", function (Request $req, Response $res, $args) {
     User::verifyLogin();
 
     $users = User::listAll();
@@ -118,7 +120,7 @@ $app->get("/admin/users", function () {
     ));
 });
 
-$app->get("/admin/users/create", function () {
+$app->get("/admin/users/create", function (Request $req, Response $res, $args) {
     User::verifyLogin();
 
     $page = new PageAdmin(array(
@@ -130,7 +132,7 @@ $app->get("/admin/users/create", function () {
     $page->setTpl("users-create");
 });
 
-$app->post("/admin/users/create", function () {
+$app->post("/admin/users/create", function (Request $req, Response $res, $args) {
 
     User::verifyLogin();
 
@@ -146,7 +148,7 @@ $app->post("/admin/users/create", function () {
     exit;
 });
 
-$app->get("/admin/users/{iduser}", function ($req, $res, $args) {
+$app->get("/admin/users/{iduser}", function (Request $req, Response $res, $args) {
     User::verifyLogin();
 
     $iduser = $args['iduser'];
@@ -166,7 +168,7 @@ $app->get("/admin/users/{iduser}", function ($req, $res, $args) {
     ));
 });
 
-$app->post("/admin/users/{iduser}", function ($req, $res, $args) {
+$app->post("/admin/users/{iduser}", function (Request $req, Response $res, $args) {
 
     User::verifyLogin();
 
@@ -187,7 +189,7 @@ $app->post("/admin/users/{iduser}", function ($req, $res, $args) {
 
 });
 
-$app->get("/admin/users/delete/{iduser}", function ($req, $res, $args) {
+$app->get("/admin/users/delete/{iduser}", function (Request $req, Response $res, $args) {
 
     User::verifyLogin();
 
@@ -201,6 +203,83 @@ $app->get("/admin/users/delete/{iduser}", function ($req, $res, $args) {
 
     header("Location: /admin/users");
     exit;
+
+});
+
+$app->get("/admin/forgot", function (Request $req, Response $res, $args){
+
+    $page = new PageAdmin(
+        array(
+            "header"=>false,
+            "footer"=>false
+        )
+    );
+
+    $page->setTpl("forgot");
+
+});
+
+$app->post("/admin/forgot", function (Request $req, Response $res, $args){
+    $email = $_POST['email'];
+
+    User::getForgot($email);
+
+    header("Location: /admin/forgot/sent");
+    exit;
+});
+
+$app->get("/admin/forgot/sent", function(Request $req, Response $res, $args){
+    $page = new PageAdmin(array(
+        "header"=>false,
+        "footer"=>false
+    ));
+    $page->setTpl("forgot-sent");
+});
+
+$app->get("/admin/forgot/reset", function(){
+    if(isset($_GET['code'])){
+
+        $code = $_GET['code'];
+
+        $user = User::validForgotDecrypt($code);
+        
+        $page = new PageAdmin(array(
+            "header"=>false,
+            "footer"=>false
+        ));
+
+        $page->setTpl("forgot-reset", array(
+            "name"=>$user['desperson'],
+            "code"=>$code
+        ));
+
+
+    }else{
+
+        header('Location: /admin/forgot');
+        exit;
+    }
+});
+
+$app->post("/admin/forgot/reset", function(){
+    $code = $_POST['code'];
+
+    $forgot = User::validForgotDecrypt($code);
+
+    User::setForgotUsed($forgot['idrecovery']);
+
+    $user = new User();
+
+    $user->get((int) $forgot['iduser']);
+
+    $user->setPassword($_POST['password']);
+
+    $page = new PageAdmin(array(
+        "header"=>false,
+        "footer"=>false
+    ));
+
+    $page->setTpl("forgot-reset-success");
 
 });
 
