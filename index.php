@@ -9,6 +9,7 @@ use Slim\Container;
 use App\Class\Page;
 use App\Class\PageAdmin;
 use App\Model\User;
+use App\Model\Category;
 
 $configContainer = [
     'settings' => [
@@ -67,10 +68,10 @@ $app->get("/lista-produtos", function (Request $req, Response $res, $args) {
 
 $app->get("/admin", function (Request $req, Response $res, $args) {
     User::verifyLogin();
-    
+
     $page = new PageAdmin(array(
         "header-data" => array(
-            "user"=>$_SESSION['user']
+            "user" => $_SESSION['user']
         )
     ));
 
@@ -111,7 +112,7 @@ $app->get("/admin/users", function (Request $req, Response $res, $args) {
 
     $page = new PageAdmin(array(
         "header-data" => array(
-            "user"=>$_SESSION['user']
+            "user" => $_SESSION['user']
         )
     ));
 
@@ -125,7 +126,7 @@ $app->get("/admin/users/create", function (Request $req, Response $res, $args) {
 
     $page = new PageAdmin(array(
         "header-data" => array(
-            "user"=>$_SESSION['user']
+            "user" => $_SESSION['user']
         )
     ));
 
@@ -159,12 +160,12 @@ $app->get("/admin/users/{iduser}", function (Request $req, Response $res, $args)
 
     $page = new PageAdmin(array(
         "header-data" => array(
-            "user"=>$_SESSION['user']
+            "user" => $_SESSION['user']
         )
     ));
 
     $page->setTpl("users-update", array(
-        "user"=>$user->getValues()
+        "user" => $user->getValues()
     ));
 });
 
@@ -186,7 +187,6 @@ $app->post("/admin/users/{iduser}", function (Request $req, Response $res, $args
 
     header("Location: /admin/users");
     exit;
-
 });
 
 $app->get("/admin/users/delete/{iduser}", function (Request $req, Response $res, $args) {
@@ -203,23 +203,21 @@ $app->get("/admin/users/delete/{iduser}", function (Request $req, Response $res,
 
     header("Location: /admin/users");
     exit;
-
 });
 
-$app->get("/admin/forgot", function (Request $req, Response $res, $args){
+$app->get("/admin/forgot", function (Request $req, Response $res, $args) {
 
     $page = new PageAdmin(
         array(
-            "header"=>false,
-            "footer"=>false
+            "header" => false,
+            "footer" => false
         )
     );
 
     $page->setTpl("forgot");
-
 });
 
-$app->post("/admin/forgot", function (Request $req, Response $res, $args){
+$app->post("/admin/forgot", function (Request $req, Response $res, $args) {
     $email = $_POST['email'];
 
     User::getForgot($email);
@@ -228,40 +226,38 @@ $app->post("/admin/forgot", function (Request $req, Response $res, $args){
     exit;
 });
 
-$app->get("/admin/forgot/sent", function(Request $req, Response $res, $args){
+$app->get("/admin/forgot/sent", function (Request $req, Response $res, $args) {
     $page = new PageAdmin(array(
-        "header"=>false,
-        "footer"=>false
+        "header" => false,
+        "footer" => false
     ));
     $page->setTpl("forgot-sent");
 });
 
-$app->get("/admin/forgot/reset", function(){
-    if(isset($_GET['code'])){
+$app->get("/admin/forgot/reset", function () {
+    if (isset($_GET['code'])) {
 
         $code = $_GET['code'];
 
         $user = User::validForgotDecrypt($code);
-        
+
         $page = new PageAdmin(array(
-            "header"=>false,
-            "footer"=>false
+            "header" => false,
+            "footer" => false
         ));
 
         $page->setTpl("forgot-reset", array(
-            "name"=>$user['desperson'],
-            "code"=>$code
+            "name" => $user['desperson'],
+            "code" => $code
         ));
-
-
-    }else{
+    } else {
 
         header('Location: /admin/forgot');
         exit;
     }
 });
 
-$app->post("/admin/forgot/reset", function(){
+$app->post("/admin/forgot/reset", function () {
     $code = $_POST['code'];
 
     $forgot = User::validForgotDecrypt($code);
@@ -275,12 +271,102 @@ $app->post("/admin/forgot/reset", function(){
     $user->setPassword($_POST['password']);
 
     $page = new PageAdmin(array(
-        "header"=>false,
-        "footer"=>false
+        "header" => false,
+        "footer" => false
     ));
 
     $page->setTpl("forgot-reset-success");
+});
 
+$app->get("/admin/categories", function () {
+    User::verifyLogin();
+
+    $categories = Category::listAll();
+
+    $page = new PageAdmin(array(
+        "header-data" => array(
+            "user" => $_SESSION['user']
+        )
+    ));
+
+    $page->setTpl("categories", array(
+        "categories" => $categories
+    ));
+});
+
+$app->get("/admin/categories/create", function () {
+    User::verifyLogin();
+
+    $page = new PageAdmin(array(
+        "header-data" => array(
+            "user" => $_SESSION['user']
+        )
+    ));
+
+    $page->setTpl("categories-create");
+});
+
+$app->post("/admin/categories/create", function () {
+    User::verifyLogin();
+
+    $category = new Category();
+
+    $category->setData($_POST);
+
+    $category->save();
+
+    header("Location: /admin/categories");
+    exit;
+});
+
+$app->get("/admin/categories/delete/{id}", function (Request $req, Response $res, $args) {
+    User::verifyLogin();
+
+    $idCategory = $args['id'];
+    
+    $category = new Category();
+
+    $category->delete((int) $idCategory);
+    
+    header("Location: /admin/categories");
+    exit;
+});
+
+$app->get("/admin/categories/{id}", function (Request $req, Response $res, $args) {
+    User::verifyLogin();
+
+    $idCategory = $args['id'];
+
+    $category = new Category();
+
+    $category->get((int) $idCategory);
+    
+    $page = new PageAdmin(array(
+        "header-data" => array(
+            "user" => $_SESSION['user']
+        )
+    ));
+
+    $page->setTpl("categories-update", array(
+        "category"=>$category->getValues()
+    ));
+});
+
+$app->post("/admin/categories/{id}", function (Request $req, Response $res, $args) {
+    User::verifyLogin();
+
+    $idCategory = $args['id'];
+
+    $category = new Category();
+
+    $category->get((int) $idCategory);
+
+    $category->setData($_POST);
+
+    $category->save();
+
+    header("Location: /admin/categories");
+    exit;
 });
 
 $app->run();
