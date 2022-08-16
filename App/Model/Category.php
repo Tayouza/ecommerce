@@ -2,10 +2,8 @@
 
 namespace App\Model;
 
-use App\Class\Mailer;
 use App\Db\Sql;
 use App\Model\Model;
-use Exception;
 
 class Category extends Model
 {
@@ -28,6 +26,8 @@ class Category extends Model
         ));
 
         $this->setData($results[0]);
+        
+        Category::updateFile();
     }
 
     public function get($idCategory)
@@ -48,5 +48,26 @@ class Category extends Model
         $sql->runQuery("DELETE FROM tb_categories WHERE idcategory = :IDCATEGORY", array(
             ":IDCATEGORY"=>$idCategory
         ));
+
+        Category::updateFile();
+    }
+
+    public static function updateFile()
+    {
+        $categories = Category::listAll();
+
+        $html = array();
+
+        foreach($categories as $row){
+            array_push($html, "<li><a href='/category/{$row['idcategory']}'>{$row['descategory']}</a></li>".PHP_EOL);
+        }
+
+        $path = $_SERVER['DOCUMENT_ROOT'].
+                DIRECTORY_SEPARATOR."App".
+                DIRECTORY_SEPARATOR."views".
+                DIRECTORY_SEPARATOR."categories-menu.html";
+
+        file_put_contents($path, implode("", $html));
+
     }
 }
