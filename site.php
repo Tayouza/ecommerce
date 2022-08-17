@@ -57,7 +57,7 @@ $app->get("/category/{id}", function (Request $req, Response $res, $args)
 
     $page->setTpl("category", array(
         'category' => $category->getValues(),
-        'products' => array()
+        'products' => Product::checkList($category->getProducts())
     ));
 
 });

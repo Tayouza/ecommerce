@@ -89,9 +89,8 @@
                             <div class="product-f-image">
                                 <img src="<?php echo htmlspecialchars( $value1["desphoto"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" alt="<?php echo htmlspecialchars( $value1["desproduct"], ENT_COMPAT, 'UTF-8', FALSE ); ?>">
                                 <div class="product-hover">
-                                    <a href="#" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to
-                                        cart</a>
-                                    <a href="/products/<?php echo htmlspecialchars( $value1["desurl"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" class="view-details-link"><i class="fa fa-link"></i> See details</a>
+                                    <a href="#" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i>Adicionar ao Carrinho</a>
+                                    <a href="/products/<?php echo htmlspecialchars( $value1["desurl"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" class="view-details-link"><i class="fa fa-link"></i> Ver detalhes</a>
                                 </div>
                             </div>
 

@@ -3,3 +3,4 @@
 <li><a href='/category/7'>Nokia</a></li>
 <li><a href='/category/9'>Xiaomi</a></li>
 <li><a href='/category/10'>LG</a></li>
+<li><a href='/category/11'>Motorola</a></li>

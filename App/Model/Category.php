@@ -70,4 +70,63 @@ class Category extends Model
         file_put_contents($path, implode("", $html));
 
     }
+
+    public function getProducts($related = true)
+    {
+        $sql = new Sql();
+
+        if($related === true){
+            return $sql->selectQuery("  SELECT * FROM tb_products
+                                        WHERE idproduct IN(
+                                            SELECT a.idproduct
+                                            FROM tb_products a
+                                            INNER JOIN tb_productscategories b
+                                            ON a.idproduct = b.idproduct
+                                            WHERE b.idcategory = :IDCATEGORY
+                                        )
+                                    ",
+                                    array(
+                                        ":IDCATEGORY"=>$this->getidcategory()
+                                    )
+                                );
+        }else{
+            
+            return $sql->selectQuery("  SELECT * FROM tb_products
+                                        WHERE idproduct NOT IN(
+                                            SELECT a.idproduct
+                                            FROM tb_products a
+                                            INNER JOIN tb_productscategories b
+                                            ON a.idproduct = b.idproduct
+                                            WHERE b.idcategory = :IDCATEGORY
+                                        )
+                                    ",
+                                    array(
+                                        ":IDCATEGORY"=>$this->getidcategory()
+                                    )
+                                );
+        }
+    }
+
+    public function addProduct(Product $product)
+    {
+        $sql = new Sql();
+
+        $sql->runQuery("INSERT INTO tb_productscategories(idcategory, idproduct) 
+                        VALUES(:IDCATEGORY, :IDPRODUCT)",
+                        array(
+                            ':IDCATEGORY'=>$this->getidcategory(),
+                            ':IDPRODUCT'=>$product->getidproduct()
+                        ));
+    }
+
+    public function removeProduct(Product $product)
+    {
+        $sql = new Sql();
+
+        $sql->runQuery("DELETE FROM tb_productscategories WHERE idcategory = :IDCATEGORY AND idproduct = :IDPRODUCT",
+                        array(
+                            ':IDCATEGORY'=>$this->getidcategory(),
+                            ':IDPRODUCT'=>$product->getidproduct()
+                        ));
+    }
 }
