@@ -4,10 +4,15 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Class\Page;
 use App\Model\Category;
+use App\Model\Product;
 
 $app->get('/', function (Request $req, Response $res, $args) {
+    $products = Product::listAll();
+
     $page = new Page();
-    $page->setTpl("index");
+    $page->setTpl("index", array(
+        'products' => Product::checkList($products)
+    ));
 });
 
 $app->get('/carrinho', function (Request $req, Response $res, $args) {

@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Db\Sql;
 use App\Model\Model;
+use Exception;
 
 class Product extends Model
 {
@@ -13,6 +14,17 @@ class Product extends Model
         $sql = new Sql();
 
         return $sql->selectQuery("SELECT * FROM tb_products");
+    }
+
+    public static function checkList($list)
+    {
+        foreach($list as &$row){
+            $p = new Product();
+            $p->setData($row);
+            $row = $p->getValues();
+        }
+
+        return $list;
     }
 
     public function save()
@@ -74,11 +86,9 @@ class Product extends Model
             DIRECTORY_SEPARATOR . $this->getidproduct() . ".webp")) {
 
             $url = "/res/img/products/" . $this->getidproduct() . ".webp";
-
         } else {
 
             $url = "/res/img/placeholder.webp";
-
         }
 
         $this->setdesphoto($url);
@@ -98,29 +108,38 @@ class Product extends Model
         $extension = explode('.', $file['name']);
         $extension = end($extension);
 
-        switch($extension)
-        {
+        switch ($extension) {
             case "jpg":
             case "jpeg":
                 $image = imagecreatefromjpeg($file['tmp_name']);
-            break;
+                break;
 
             case "gif":
                 $image = imagecreatefromgif($file['tmp_name']);
-            break;
+                break;
 
             case "png":
                 $image = imagecreatefrompng($file['tmp_name']);
-            break;
+                break;
 
+            case "webp":
+                $image = imagecreatefromwebp($file['tmp_name']);
+                break;
+
+            default:
+                throw new Exception("Não são aceitas imagens/arquivos neste formato");
+                break;
         }
 
         $dist = $_SERVER['DOCUMENT_ROOT'] .
-                DIRECTORY_SEPARATOR . "res" .
-                DIRECTORY_SEPARATOR . "img" .
-                DIRECTORY_SEPARATOR . "products" .
-                DIRECTORY_SEPARATOR . $this->getidproduct() . ".webp";
+            DIRECTORY_SEPARATOR . "res" .
+            DIRECTORY_SEPARATOR . "img" .
+            DIRECTORY_SEPARATOR . "products" .
+            DIRECTORY_SEPARATOR . $this->getidproduct() . ".webp";
 
+        imagepalettetotruecolor($image);
+        imagealphablending($image, true);
+        imagesavealpha($image, true);
         imagewebp($image, $dist);
         imagedestroy($image);
 

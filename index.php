@@ -26,6 +26,7 @@ $c['notFoundHandler'] = function ($c) {
 $app = new Slim($c);
 
 //split routes for "admin" and "site"
+require_once("functions.php");
 require_once("site.php");
 require_once("admin.php");
 require_once("admin-users.php");
