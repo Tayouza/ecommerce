@@ -1,23 +1,36 @@
 <?php
-
+session_start();
 require_once("vendor/autoload.php");
 
-use Slim\Slim;
-use App\Class\Page;
+use Slim\App as Slim;
+use Slim\Container;
 
-$app = new Slim();
+$configContainer = [
+    'settings' => [
+        'displayErrorDetails' => true
+    ]
+];
 
-$app->config('debug', true);
+$c = new Container($configContainer); //Create Your container
 
-$app->get('/', function () {
-    $options = array(
-        "data" => array(
-            "title" => "Ecommerce",
-            "h1" => "hello"
-        )
-    );
-    $page = new Page($options);
-    $page->setTpl("index");
-});
+//Override the default Not Found Handler before creating App
+$c['notFoundHandler'] = function ($c) {
+    return function ($request, $response) use ($c) {
+        $file = $_SERVER['DOCUMENT_ROOT'] . "/App/views/404.html";
+        return $response->withStatus(404)
+            ->withHeader('Content-Type', 'text/html')
+            ->write(file_get_contents($file));
+    };
+};
+
+$app = new Slim($c);
+
+//split routes for "admin" and "site"
+require_once("functions.php");
+require_once("site.php");
+require_once("admin.php");
+require_once("admin-users.php");
+require_once("admin-categories.php");
+require_once("admin-products.php");
 
 $app->run();

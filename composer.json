@@ -7,9 +7,10 @@
         }
     ],
     "require": {
-    	"phpmailer/phpmailer":"5.2.22",
-    	"slim/slim":"2.0",
-    	"rain/raintpl":"3.0.0"
+    	"phpmailer/phpmailer":"6.*",
+    	"slim/slim":"3.*",
+    	"rain/raintpl":"3.0.0",
+        "vlucas/phpdotenv":"5.*"
     },
     "autoload": {
         "psr-4": {
