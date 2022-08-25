@@ -1,6 +1,6 @@
 <?php
 
-const   HOSTNAME = "mysql",
-        DBUSER = "root",
-        DBPASS = "1234",
-        DBNAME = "db_ecommerce";
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();

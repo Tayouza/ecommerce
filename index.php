@@ -2,11 +2,8 @@
 session_start();
 require_once("vendor/autoload.php");
 
-use Dotenv;
 use Slim\App as Slim;
 use Slim\Container;
-
-
 
 $configContainer = [
     'settings' => [

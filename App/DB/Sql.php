@@ -13,9 +13,11 @@ class Sql extends PDO
     {
         if(!isset($this->conn)){
             $this->conn = new PDO(
-                "mysql:host=" . HOSTNAME . ";dbname=" . DBNAME,
-                DBUSER,
-                DBPASS
+                $_ENV['DB_CONNECTION'] .
+                ":host=" . $_ENV['DB_HOST'] . 
+                ";dbname=" . $_ENV['DB_DATABASE'],
+                $_ENV['DB_USERNAME'],
+                $_ENV['DB_PASSWORD']
             );
         }
         return $this->conn;
