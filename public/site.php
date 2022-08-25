@@ -61,3 +61,7 @@ $app->get("/category/{id}", function (Request $req, Response $res, $args)
     ));
 
 });
+
+$app->get("/php", function(){
+    echo phpinfo();
+});

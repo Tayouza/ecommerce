@@ -3,12 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 14-Ago-2022 às 01:11
+-- Tempo de geração: 21-Ago-2022 às 16:19
 -- Versão do servidor: 10.4.22-MariaDB
 -- versão do PHP: 8.1.2
-
-CREATE DATABASE db_ecommerce;
-USE db_ecommerce;
+CREATE DATABASE IF NOT EXISTS `db_ecommerce` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `db_ecommerce`;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -27,6 +26,54 @@ DELIMITER $$
 --
 -- Procedimentos
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_categories_save` (`pidcategory` INT, `pdescategory` VARCHAR(64))  BEGIN
+	
+	IF pidcategory > 0 THEN
+		
+		UPDATE tb_categories
+        SET descategory = pdescategory
+        WHERE idcategory = pidcategory;
+        
+    ELSE
+		
+		INSERT INTO tb_categories (descategory) VALUES(pdescategory);
+        
+        SET pidcategory = LAST_INSERT_ID();
+        
+    END IF;
+    
+    SELECT * FROM tb_categories WHERE idcategory = pidcategory;
+    
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_products_save` (`pidproduct` INT(11), `pdesproduct` VARCHAR(64), `pvlprice` DECIMAL(10,2), `pvlwidth` DECIMAL(10,2), `pvlheight` DECIMAL(10,2), `pvllength` DECIMAL(10,2), `pvlweight` DECIMAL(10,2), `pdesurl` VARCHAR(128))  BEGIN
+	
+	IF pidproduct > 0 THEN
+		
+		UPDATE tb_products
+        SET 
+			desproduct = pdesproduct,
+            vlprice = pvlprice,
+            vlwidth = pvlwidth,
+            vlheight = pvlheight,
+            vllength = pvllength,
+            vlweight = pvlweight,
+            desurl = pdesurl
+        WHERE idproduct = pidproduct;
+        
+    ELSE
+		
+		INSERT INTO tb_products (desproduct, vlprice, vlwidth, vlheight, vllength, vlweight, desurl) 
+        VALUES(pdesproduct, pvlprice, pvlwidth, pvlheight, pvllength, pvlweight, pdesurl);
+        
+        SET pidproduct = LAST_INSERT_ID();
+        
+    END IF;
+    
+    SELECT * FROM tb_products WHERE idproduct = pidproduct;
+    
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_userspasswordsrecoveries_create` (`piduser` INT, `pdesip` VARCHAR(45))  BEGIN
   
   INSERT INTO tb_userspasswordsrecoveries (iduser, desip)
@@ -92,69 +139,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_users_save` (`pdesperson` VARCHA
     
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_categories_save` (
-pidcategory INT,
-pdescategory VARCHAR(64)
-)
-BEGIN
-	
-	IF pidcategory > 0 THEN
-		
-		UPDATE tb_categories
-        SET descategory = pdescategory
-        WHERE idcategory = pidcategory;
-        
-    ELSE
-		
-		INSERT INTO tb_categories (descategory) VALUES(pdescategory);
-        
-        SET pidcategory = LAST_INSERT_ID();
-        
-    END IF;
-    
-    SELECT * FROM tb_categories WHERE idcategory = pidcategory;
-    
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_products_save`(
-pidproduct int(11),
-pdesproduct varchar(64),
-pvlprice decimal(10,2),
-pvlwidth decimal(10,2),
-pvlheight decimal(10,2),
-pvllength decimal(10,2),
-pvlweight decimal(10,2),
-pdesurl varchar(128)
-)
-BEGIN
-	
-	IF pidproduct > 0 THEN
-		
-		UPDATE tb_products
-        SET 
-			desproduct = pdesproduct,
-            vlprice = pvlprice,
-            vlwidth = pvlwidth,
-            vlheight = pvlheight,
-            vllength = pvllength,
-            vlweight = pvlweight,
-            desurl = pdesurl
-        WHERE idproduct = pidproduct;
-        
-    ELSE
-		
-		INSERT INTO tb_products (desproduct, vlprice, vlwidth, vlheight, vllength, vlweight, desurl) 
-        VALUES(pdesproduct, pvlprice, pvlwidth, pvlheight, pvllength, pvlweight, pdesurl);
-        
-        SET pidproduct = LAST_INSERT_ID();
-        
-    END IF;
-    
-    SELECT * FROM tb_products WHERE idproduct = pidproduct;
-    
-END$$
-
-
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -216,6 +200,18 @@ CREATE TABLE `tb_categories` (
   `dtregister` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Extraindo dados da tabela `tb_categories`
+--
+
+INSERT INTO `tb_categories` (`idcategory`, `descategory`, `dtregister`) VALUES
+(1, 'Apple', '2022-08-15 01:55:42'),
+(6, 'Samsung', '2022-08-15 02:25:25'),
+(7, 'Nokia', '2022-08-15 02:25:35'),
+(9, 'Xiaomi', '2022-08-15 15:26:17'),
+(10, 'LG', '2022-08-15 22:26:19'),
+(11, 'Motorola', '2022-08-17 23:05:59');
+
 -- --------------------------------------------------------
 
 --
@@ -272,10 +268,8 @@ CREATE TABLE `tb_persons` (
 --
 
 INSERT INTO `tb_persons` (`idperson`, `desperson`, `desemail`, `nrphone`, `dtregister`) VALUES
-(1, 'Administrador', 'admin@hcode.com.br', 2147483647, '2017-03-01 06:00:00'),
-(11, 'Taylor', 'tata@mail.com', 51996390912, '2022-08-11 01:24:07'),
-(13, 'Ruthieli', 'ruthieli.lopes1@gmail.com', 123123123, '2022-08-11 17:44:03'),
-(15, 'TR Fotografia', 'tr.fotografos@gmail.com', 5159626, '2022-08-13 17:03:47');
+(1, 'Administrador', 'tr.fotografos@gmail.com', 2147483647, '2017-03-01 06:00:00'),
+(16, 'Ruth', 'ruthieli.lopes1@gmail.com', 649412489, '2022-08-13 23:26:04');
 
 -- --------------------------------------------------------
 
@@ -300,9 +294,14 @@ CREATE TABLE `tb_products` (
 --
 
 INSERT INTO `tb_products` (`idproduct`, `desproduct`, `vlprice`, `vlwidth`, `vlheight`, `vllength`, `vlweight`, `desurl`, `dtregister`) VALUES
-(1, 'Smartphone Android 7.0', '999.95', '75.00', '151.00', '80.00', '167.00', 'smartphone-android-7.0', '2017-03-13 06:00:00'),
 (2, 'SmartTV LED 4K', '3925.99', '917.00', '596.00', '288.00', '8600.00', 'smarttv-led-4k', '2017-03-13 06:00:00'),
-(3, 'Notebook 14\" 4GB 1TB', '1949.99', '345.00', '23.00', '30.00', '2000.00', 'notebook-14-4gb-1tb', '2017-03-13 06:00:00');
+(4, 'IPad 32Gb', '2599.00', '0.75', '16.20', '32.40', '0.43', 'ipad-32gb', '2022-08-16 01:24:26'),
+(5, 'Caixa de som BT', '125.00', '10.00', '15.00', '10.00', '200.00', 'caixa-som-bt', '2022-08-16 22:50:24'),
+(6, 'Smartphone Motorola Moto G5 Plus', '1135.23', '15.20', '7.40', '0.70', '0.16', 'smartphone-motorola-moto-g5-plus', '2022-08-16 23:13:17'),
+(7, 'Smartphone Moto Z Play', '1887.78', '14.10', '0.90', '1.16', '0.13', 'smartphone-moto-z-play', '2022-08-16 23:13:17'),
+(8, 'Smartphone Samsung Galaxy J5 Pro', '1299.00', '14.60', '7.10', '0.80', '0.16', 'smartphone-samsung-galaxy-j5', '2022-08-16 23:13:17'),
+(9, 'Smartphone Samsung Galaxy J7 Prime', '1149.00', '15.10', '7.50', '0.80', '0.16', 'smartphone-samsung-galaxy-j7', '2022-08-16 23:13:17'),
+(10, 'Smartphone Samsung Galaxy J3 Dual', '679.90', '14.20', '7.10', '0.70', '0.14', 'smartphone-samsung-galaxy-j3', '2022-08-16 23:13:17');
 
 -- --------------------------------------------------------
 
@@ -314,6 +313,20 @@ CREATE TABLE `tb_productscategories` (
   `idcategory` int(11) NOT NULL,
   `idproduct` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Extraindo dados da tabela `tb_productscategories`
+--
+
+INSERT INTO `tb_productscategories` (`idcategory`, `idproduct`) VALUES
+(1, 4),
+(6, 2),
+(6, 8),
+(6, 9),
+(6, 10),
+(9, 5),
+(11, 6),
+(11, 7);
 
 -- --------------------------------------------------------
 
@@ -335,10 +348,8 @@ CREATE TABLE `tb_users` (
 --
 
 INSERT INTO `tb_users` (`iduser`, `idperson`, `deslogin`, `despassword`, `inadmin`, `dtregister`) VALUES
-(1, 1, 'admin', '$2y$12$YlooCyNvyTji8bPRcrfNfOKnVMmZA9ViM2A3IpFjmrpIbp5ovNmga', 1, '2017-03-13 06:00:00'),
-(11, 11, 'Tayouza', '$2y$10$.vNHM2GOTennQZ8S3bvtguK3dt4pPVoAa/po8hhzkcVGo72ToRIMq', 1, '2022-08-11 01:24:07'),
-(13, 13, 'ruth', '$2y$10$kz82SaX30fA5qQ8jdfoSxOLE4XZDz41Q4QnRX3qV.s/iAwyIp.cJi', 1, '2022-08-11 17:44:03'),
-(15, 15, 'trfoto', '$2y$12$2xisB6hsbio7EC8RAO2/zOCXshezzZEZbcCWfP9dMuP4fJWHk5dCy', 1, '2022-08-13 17:03:47');
+(1, 1, 'admin', '$2y$12$c9Oqd7U6KgmzuoahUOmanubpvlbIAPNHNLv/2djmlYiPx9KYoVFyO', 1, '2017-03-13 06:00:00'),
+(2, 16, 'ruth', '$2y$12$JwoAPLqWUbFl7puXrtbsNey4KLMaIMzyDeHiUBFB5V2dL5UX8U31K', 1, '2022-08-13 23:26:04');
 
 -- --------------------------------------------------------
 
@@ -376,8 +387,9 @@ CREATE TABLE `tb_userspasswordsrecoveries` (
 --
 
 INSERT INTO `tb_userspasswordsrecoveries` (`idrecovery`, `iduser`, `desip`, `dtrecovery`, `dtregister`) VALUES
-(54, 15, '127.0.0.1', NULL, '2022-08-13 21:34:01'),
-(55, 15, '127.0.0.1', '2022-08-13 20:08:37', '2022-08-13 22:55:43');
+(56, 1, '127.0.0.1', NULL, '2022-08-13 23:22:10'),
+(57, 1, '127.0.0.1', '2022-08-13 20:24:25', '2022-08-13 23:24:03'),
+(58, 2, '127.0.0.1', NULL, '2022-08-13 23:26:52');
 
 --
 -- Índices para tabelas despejadas
@@ -487,7 +499,7 @@ ALTER TABLE `tb_cartsproducts`
 -- AUTO_INCREMENT de tabela `tb_categories`
 --
 ALTER TABLE `tb_categories`
-  MODIFY `idcategory` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `idcategory` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de tabela `tb_orders`
@@ -505,19 +517,19 @@ ALTER TABLE `tb_ordersstatus`
 -- AUTO_INCREMENT de tabela `tb_persons`
 --
 ALTER TABLE `tb_persons`
-  MODIFY `idperson` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `idperson` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de tabela `tb_products`
 --
 ALTER TABLE `tb_products`
-  MODIFY `idproduct` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `idproduct` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `tb_users`
 --
 ALTER TABLE `tb_users`
-  MODIFY `iduser` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `iduser` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `tb_userslogs`
@@ -529,7 +541,7 @@ ALTER TABLE `tb_userslogs`
 -- AUTO_INCREMENT de tabela `tb_userspasswordsrecoveries`
 --
 ALTER TABLE `tb_userspasswordsrecoveries`
-  MODIFY `idrecovery` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `idrecovery` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- Restrições para despejos de tabelas

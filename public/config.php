@@ -1,6 +1,6 @@
 <?php
 
-const   HOSTNAME = "127.0.0.1",
+const   HOSTNAME = "mysql",
         DBUSER = "root",
-        DBPASS = "",
+        DBPASS = "1234",
         DBNAME = "db_ecommerce";
