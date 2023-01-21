@@ -145,4 +145,15 @@ class Product extends Model
 
         $this->checkPhoto();
     }
+
+    public function getFromUrl($desurl)
+    {
+        $sql = new Sql();
+
+        $result = $sql->selectQuery("SELECT * FROM tb_products WHERE desurl = :DESURL LIMIT 1", [
+            ':DESURL' => $desurl
+        ]);
+
+        $this->setData($result);
+    }
 }

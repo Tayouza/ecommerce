@@ -1,2 +1,4 @@
+/App/views-cache/*
 /public/App/views-cache/*
+/vendor/*
 .env

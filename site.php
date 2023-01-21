@@ -20,11 +20,6 @@ $app->get('/carrinho', function (Request $req, Response $res, $args) {
     $page->setTpl('carrinho');
 });
 
-$app->get("/detalhes-produto", function (Request $req, Response $res, $args) {
-    $page = new Page();
-    $page->setTpl('detalhes-produto');
-});
-
 $app->get("/login", function (Request $req, Response $res, $args) {
     $page = new Page();
     $page->setTpl('login');
@@ -45,7 +40,7 @@ $app->get("/lista-produtos", function (Request $req, Response $res, $args) {
     $page->setTpl('lista-produtos');
 });
 
-$app->get("/category/{id}", function (Request $req, Response $res, $args)
+$app->get("/categoria/{id}", function (Request $req, Response $res, $args)
 {
     $idCategory = $args['id'];
 
@@ -62,6 +57,15 @@ $app->get("/category/{id}", function (Request $req, Response $res, $args)
 
 });
 
-$app->get("/php", function(){
-    echo phpinfo();
+$app->get("/products/{desurl}", function(Request $req, Response $res, $args){
+    $product = new Product();
+
+    $product->getFromUrl($args['desurl']);
+
+    $page = new Page();
+
+    $page->setTpl("detalhes-produto", [
+        'product'    => $product->getValues(),
+        'categories' => []
+    ]);
 });
