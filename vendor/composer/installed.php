@@ -3,7 +3,7 @@
         'name' => 'tayouza/ecommerce',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'f4d8e48ea37523afe17493f019b4aa19d7a869ea',
+        'reference' => '25ae7f53adbeb541534e08ff19f730e4e7c165db',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -130,7 +130,7 @@
         'tayouza/ecommerce' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'f4d8e48ea37523afe17493f019b4aa19d7a869ea',
+            'reference' => '25ae7f53adbeb541534e08ff19f730e4e7c165db',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

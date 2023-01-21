@@ -5,10 +5,14 @@ include .env
 export
 
 up:
-	docker compose up -d
+	cd Docker && docker compose up -d
 
 install:
+	git config core.fileMode false
+	sudo chmod -R 777 .
 	make up
 	composer update
-	git config core.fileMode false
-	sudo chamod -R 777 .
+	make db-config
+
+db-config:
+	mysql -h 127.0.0.1 -P $(DB_PORT) -w -u root -p < db_ecommerce.sql
