@@ -1,29 +1,58 @@
 <?php
 /**
- * Slim Framework (https://slimframework.com)
+ * Slim Framework (http://slimframework.com)
  *
- * @license https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
+ * @link      https://github.com/slimphp/Slim
+ * @copyright Copyright (c) 2011-2016 Josh Lockhart
+ * @license   https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
  */
-
 namespace Slim\Handlers;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use RuntimeException;
 use Slim\Http\Body;
-use UnexpectedValueException;
 
-class Error extends AbstractError
+/**
+ * Default Slim application error handler
+ *
+ * It outputs the error message and diagnostic information in either JSON, XML,
+ * or HTML based on the Accept header.
+ */
+class Error
 {
+    protected $displayErrorDetails;
+
     /**
+     * Known handled content types
+     *
+     * @var array
+     */
+    protected $knownContentTypes = [
+        'application/json',
+        'application/xml',
+        'text/xml',
+        'text/html',
+    ];
+
+    /**
+     * Constructor
+     *
+     * @param boolean $displayErrorDetails Set to true to display full details
+     */
+    public function __construct($displayErrorDetails = false)
+    {
+        $this->displayErrorDetails = (bool)$displayErrorDetails;
+    }
+
+    /**
+     * Invoke error handler
+     *
      * @param ServerRequestInterface $request   The most recent Request object
      * @param ResponseInterface      $response  The most recent Response object
      * @param Exception              $exception The caught Exception object
      *
      * @return ResponseInterface
-     *
-     * @throws UnexpectedValueException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, Exception $exception)
     {
@@ -41,9 +70,6 @@ class Error extends AbstractError
             case 'text/html':
                 $output = $this->renderHtmlErrorMessage($exception);
                 break;
-
-            default:
-                throw new UnexpectedValueException('Cannot render unknown content type ' . $contentType);
         }
 
         $this->writeToErrorLog($exception);
@@ -57,11 +83,69 @@ class Error extends AbstractError
                 ->withBody($body);
     }
 
+
+    /**
+     * Write to the error log if displayErrorDetails is false
+     *
+     * @param Exception $exception
+     * @return void
+     */
+    protected function writeToErrorLog($exception)
+    {
+        if ($this->displayErrorDetails) {
+            return;
+        }
+
+        $message = 'Slim Application Error:' . PHP_EOL;
+        $message .= $this->renderTextException($exception);
+        while ($exception = $exception->getPrevious()) {
+            $message .= PHP_EOL . 'Previous exception:' . PHP_EOL;
+            $message .= $this->renderTextException($exception);
+        }
+
+        $message .= PHP_EOL . 'View in rendered output by enabling the "displayErrorDetails" setting.' . PHP_EOL;
+
+        error_log($message);
+    }
+
+    /**
+     * Render exception as Text.
+     *
+     * @param Exception $exception
+     *
+     * @return string
+     */
+    protected function renderTextException(Exception $exception)
+    {
+        $text = sprintf('Type: %s' . PHP_EOL, get_class($exception));
+
+        if (($code = $exception->getCode())) {
+            $text .= sprintf('Code: %s' . PHP_EOL, $code);
+        }
+
+        if (($message = $exception->getMessage())) {
+            $text .= sprintf('Message: %s' . PHP_EOL, htmlentities($message));
+        }
+
+        if (($file = $exception->getFile())) {
+            $text .= sprintf('File: %s' . PHP_EOL, $file);
+        }
+
+        if (($line = $exception->getLine())) {
+            $text .= sprintf('Line: %s' . PHP_EOL, $line);
+        }
+
+        if (($trace = $exception->getTraceAsString())) {
+            $text .= sprintf('Trace: %s', $trace);
+        }
+
+        return $text;
+    }
+
     /**
      * Render HTML error page
      *
      * @param  Exception $exception
-     *
      * @return string
      */
     protected function renderHtmlErrorMessage(Exception $exception)
@@ -75,7 +159,7 @@ class Error extends AbstractError
 
             while ($exception = $exception->getPrevious()) {
                 $html .= '<h2>Previous exception</h2>';
-                $html .= $this->renderHtmlExceptionOrError($exception);
+                $html .= $this->renderHtmlException($exception);
             }
         } else {
             $html = '<p>A website error has occurred. Sorry for the temporary inconvenience.</p>';
@@ -97,32 +181,12 @@ class Error extends AbstractError
     /**
      * Render exception as HTML.
      *
-     * Provided for backwards compatibility; use renderHtmlExceptionOrError().
-     *
      * @param Exception $exception
      *
      * @return string
      */
     protected function renderHtmlException(Exception $exception)
     {
-        return $this->renderHtmlExceptionOrError($exception);
-    }
-
-    /**
-     * Render exception or error as HTML.
-     *
-     * @param Exception|\Error $exception
-     *
-     * @return string
-     *
-     * @throws RuntimeException
-     */
-    protected function renderHtmlExceptionOrError($exception)
-    {
-        if (!$exception instanceof Exception && !$exception instanceof \Error) {
-            throw new RuntimeException("Unexpected type. Expected Exception or Error.");
-        }
-
         $html = sprintf('<div><strong>Type:</strong> %s</div>', get_class($exception));
 
         if (($code = $exception->getCode())) {
@@ -152,8 +216,7 @@ class Error extends AbstractError
     /**
      * Render JSON error
      *
-     * @param Exception $exception
-     *
+     * @param  Exception $exception
      * @return string
      */
     protected function renderJsonErrorMessage(Exception $exception)
@@ -183,8 +246,7 @@ class Error extends AbstractError
     /**
      * Render XML error
      *
-     * @param Exception $exception
-     *
+     * @param  Exception $exception
      * @return string
      */
     protected function renderXmlErrorMessage(Exception $exception)
@@ -211,11 +273,28 @@ class Error extends AbstractError
      * Returns a CDATA section with the given content.
      *
      * @param  string $content
-     *
      * @return string
      */
     private function createCdataSection($content)
     {
         return sprintf('<![CDATA[%s]]>', str_replace(']]>', ']]]]><![CDATA[>', $content));
+    }
+
+    /**
+     * Determine which content type we know about is wanted using Accept header
+     *
+     * @param ServerRequestInterface $request
+     * @return string
+     */
+    private function determineContentType(ServerRequestInterface $request)
+    {
+        $acceptHeader = $request->getHeaderLine('Accept');
+        $selectedContentTypes = array_intersect(explode(',', $acceptHeader), $this->knownContentTypes);
+
+        if (count($selectedContentTypes)) {
+            return $selectedContentTypes[0];
+        }
+
+        return 'text/html';
     }
 }

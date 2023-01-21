@@ -1,51 +1,60 @@
 <?php
 /**
- * Slim Framework (https://slimframework.com)
+ * Slim Framework (http://slimframework.com)
  *
- * @license https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
+ * @link      https://github.com/slimphp/Slim
+ * @copyright Copyright (c) 2011-2016 Josh Lockhart
+ * @license   https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
  */
-
 namespace Slim\Handlers;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Body;
-use UnexpectedValueException;
 
-class NotFound extends AbstractHandler
+/**
+ * Default Slim application not found handler.
+ *
+ * It outputs a simple message in either JSON, XML or HTML based on the
+ * Accept header.
+ */
+class NotFound
 {
     /**
+     * Known handled content types
+     *
+     * @var array
+     */
+    protected $knownContentTypes = [
+        'application/json',
+        'application/xml',
+        'text/xml',
+        'text/html',
+    ];
+
+    /**
+     * Invoke not found handler
+     *
      * @param  ServerRequestInterface $request  The most recent Request object
      * @param  ResponseInterface      $response The most recent Response object
      *
      * @return ResponseInterface
-     *
-     * @throws UnexpectedValueException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
-        if ($request->getMethod() === 'OPTIONS') {
-            $contentType = 'text/plain';
-            $output = $this->renderPlainNotFoundOutput();
-        } else {
-            $contentType = $this->determineContentType($request);
-            switch ($contentType) {
-                case 'application/json':
-                    $output = $this->renderJsonNotFoundOutput();
-                    break;
+        $contentType = $this->determineContentType($request);
+        switch ($contentType) {
+            case 'application/json':
+                $output = $this->renderJsonNotFoundOutput($request, $response);
+                break;
 
-                case 'text/xml':
-                case 'application/xml':
-                    $output = $this->renderXmlNotFoundOutput();
-                    break;
+            case 'text/xml':
+            case 'application/xml':
+                $output = $this->renderXmlNotFoundOutput($request, $response);
+                break;
 
-                case 'text/html':
-                    $output = $this->renderHtmlNotFoundOutput($request);
-                    break;
-
-                default:
-                    throw new UnexpectedValueException('Cannot render unknown content type ' . $contentType);
-            }
+            case 'text/html':
+                $output = $this->renderHtmlNotFoundOutput($request, $response);
         }
 
         $body = new Body(fopen('php://temp', 'r+'));
@@ -57,21 +66,32 @@ class NotFound extends AbstractHandler
     }
 
     /**
-     * Render plain not found message
+     * Determine which content type we know about is wanted using Accept header
      *
+     * @param ServerRequestInterface $request
      * @return string
      */
-    protected function renderPlainNotFoundOutput()
+    private function determineContentType(ServerRequestInterface $request)
     {
-        return 'Not found';
+        $acceptHeader = $request->getHeaderLine('Accept');
+        $selectedContentTypes = array_intersect(explode(',', $acceptHeader), $this->knownContentTypes);
+
+        if (count($selectedContentTypes)) {
+            return $selectedContentTypes[0];
+        }
+
+        return 'text/html';
     }
 
     /**
      * Return a response for application/json content not found
      *
-     * @return string
+     * @param  ServerRequestInterface $request  The most recent Request object
+     * @param  ResponseInterface      $response The most recent Response object
+     *
+     * @return ResponseInterface
      */
-    protected function renderJsonNotFoundOutput()
+    protected function renderJsonNotFoundOutput(ServerRequestInterface $request, ResponseInterface $response)
     {
         return '{"message":"Not found"}';
     }
@@ -79,9 +99,12 @@ class NotFound extends AbstractHandler
     /**
      * Return a response for xml content not found
      *
-     * @return string
+     * @param  ServerRequestInterface $request  The most recent Request object
+     * @param  ResponseInterface      $response The most recent Response object
+     *
+     * @return ResponseInterface
      */
-    protected function renderXmlNotFoundOutput()
+    protected function renderXmlNotFoundOutput(ServerRequestInterface $request, ResponseInterface $response)
     {
         return '<root><message>Not found</message></root>';
     }
@@ -89,11 +112,12 @@ class NotFound extends AbstractHandler
     /**
      * Return a response for text/html content not found
      *
-     * @param  ServerRequestInterface $request The most recent Request object
+     * @param  ServerRequestInterface $request  The most recent Request object
+     * @param  ResponseInterface      $response The most recent Response object
      *
-     * @return string
+     * @return ResponseInterface
      */
-    protected function renderHtmlNotFoundOutput(ServerRequestInterface $request)
+    protected function renderHtmlNotFoundOutput(ServerRequestInterface $request, ResponseInterface $response)
     {
         $homeUrl = (string)($request->getUri()->withPath('')->withQuery('')->withFragment(''));
         return <<<END

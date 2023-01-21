@@ -8,9 +8,9 @@
     ],
     "require": {
     	"phpmailer/phpmailer":"6.*",
-    	"slim/slim":"3.*",
     	"rain/raintpl":"3.0.0",
-        "vlucas/phpdotenv":"5.*"
+        "vlucas/phpdotenv":"5.*",
+        "slim/slim": "3.2.*"
     },
     "autoload": {
         "psr-4": {

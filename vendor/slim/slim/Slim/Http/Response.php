@@ -1,17 +1,17 @@
 <?php
 /**
- * Slim Framework (https://slimframework.com)
+ * Slim Framework (http://slimframework.com)
  *
- * @license https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
+ * @link      https://github.com/slimphp/Slim
+ * @copyright Copyright (c) 2011-2016 Josh Lockhart
+ * @license   https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
  */
-
 namespace Slim\Http;
 
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use RuntimeException;
 use Slim\Interfaces\Http\HeadersInterface;
 
 /**
@@ -31,7 +31,7 @@ class Response extends Message implements ResponseInterface
      *
      * @var int
      */
-    protected $status = StatusCode::HTTP_OK;
+    protected $status = 200;
 
     /**
      * Reason phrase
@@ -47,93 +47,81 @@ class Response extends Message implements ResponseInterface
      */
     protected static $messages = [
         //Informational 1xx
-        StatusCode::HTTP_CONTINUE => 'Continue',
-        StatusCode::HTTP_SWITCHING_PROTOCOLS => 'Switching Protocols',
-        StatusCode::HTTP_PROCESSING => 'Processing',
+        100 => 'Continue',
+        101 => 'Switching Protocols',
+        102 => 'Processing',
         //Successful 2xx
-        StatusCode::HTTP_OK => 'OK',
-        StatusCode::HTTP_CREATED => 'Created',
-        StatusCode::HTTP_ACCEPTED => 'Accepted',
-        StatusCode::HTTP_NONAUTHORITATIVE_INFORMATION => 'Non-Authoritative Information',
-        StatusCode::HTTP_NO_CONTENT => 'No Content',
-        StatusCode::HTTP_RESET_CONTENT => 'Reset Content',
-        StatusCode::HTTP_PARTIAL_CONTENT => 'Partial Content',
-        StatusCode::HTTP_MULTI_STATUS => 'Multi-Status',
-        StatusCode::HTTP_ALREADY_REPORTED => 'Already Reported',
-        StatusCode::HTTP_IM_USED => 'IM Used',
+        200 => 'OK',
+        201 => 'Created',
+        202 => 'Accepted',
+        203 => 'Non-Authoritative Information',
+        204 => 'No Content',
+        205 => 'Reset Content',
+        206 => 'Partial Content',
+        207 => 'Multi-Status',
+        208 => 'Already Reported',
+        226 => 'IM Used',
         //Redirection 3xx
-        StatusCode::HTTP_MULTIPLE_CHOICES => 'Multiple Choices',
-        StatusCode::HTTP_MOVED_PERMANENTLY => 'Moved Permanently',
-        StatusCode::HTTP_FOUND => 'Found',
-        StatusCode::HTTP_SEE_OTHER => 'See Other',
-        StatusCode::HTTP_NOT_MODIFIED => 'Not Modified',
-        StatusCode::HTTP_USE_PROXY => 'Use Proxy',
-        StatusCode::HTTP_UNUSED => '(Unused)',
-        StatusCode::HTTP_TEMPORARY_REDIRECT => 'Temporary Redirect',
-        StatusCode::HTTP_PERMANENT_REDIRECT => 'Permanent Redirect',
+        300 => 'Multiple Choices',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        303 => 'See Other',
+        304 => 'Not Modified',
+        305 => 'Use Proxy',
+        306 => '(Unused)',
+        307 => 'Temporary Redirect',
+        308 => 'Permanent Redirect',
         //Client Error 4xx
-        StatusCode::HTTP_BAD_REQUEST => 'Bad Request',
-        StatusCode::HTTP_UNAUTHORIZED => 'Unauthorized',
-        StatusCode::HTTP_PAYMENT_REQUIRED => 'Payment Required',
-        StatusCode::HTTP_FORBIDDEN => 'Forbidden',
-        StatusCode::HTTP_NOT_FOUND => 'Not Found',
-        StatusCode::HTTP_METHOD_NOT_ALLOWED => 'Method Not Allowed',
-        StatusCode::HTTP_NOT_ACCEPTABLE => 'Not Acceptable',
-        StatusCode::HTTP_PROXY_AUTHENTICATION_REQUIRED => 'Proxy Authentication Required',
-        StatusCode::HTTP_REQUEST_TIMEOUT => 'Request Timeout',
-        StatusCode::HTTP_CONFLICT => 'Conflict',
-        StatusCode::HTTP_GONE => 'Gone',
-        StatusCode::HTTP_LENGTH_REQUIRED => 'Length Required',
-        StatusCode::HTTP_PRECONDITION_FAILED => 'Precondition Failed',
-        StatusCode::HTTP_REQUEST_ENTITY_TOO_LARGE => 'Request Entity Too Large',
-        StatusCode::HTTP_REQUEST_URI_TOO_LONG => 'Request-URI Too Long',
-        StatusCode::HTTP_UNSUPPORTED_MEDIA_TYPE => 'Unsupported Media Type',
-        StatusCode::HTTP_REQUESTED_RANGE_NOT_SATISFIABLE => 'Requested Range Not Satisfiable',
-        StatusCode::HTTP_EXPECTATION_FAILED => 'Expectation Failed',
-        StatusCode::HTTP_IM_A_TEAPOT => 'I\'m a teapot',
-        StatusCode::HTTP_MISDIRECTED_REQUEST => 'Misdirected Request',
-        StatusCode::HTTP_UNPROCESSABLE_ENTITY => 'Unprocessable Entity',
-        StatusCode::HTTP_LOCKED => 'Locked',
-        StatusCode::HTTP_FAILED_DEPENDENCY => 'Failed Dependency',
-        StatusCode::HTTP_UPGRADE_REQUIRED => 'Upgrade Required',
-        StatusCode::HTTP_PRECONDITION_REQUIRED => 'Precondition Required',
-        StatusCode::HTTP_TOO_MANY_REQUESTS => 'Too Many Requests',
-        StatusCode::HTTP_REQUEST_HEADER_FIELDS_TOO_LARGE => 'Request Header Fields Too Large',
-        StatusCode::HTTP_CONNECTION_CLOSED_WITHOUT_RESPONSE => 'Connection Closed Without Response',
-        StatusCode::HTTP_UNAVAILABLE_FOR_LEGAL_REASONS => 'Unavailable For Legal Reasons',
-        StatusCode::HTTP_CLIENT_CLOSED_REQUEST => 'Client Closed Request',
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        402 => 'Payment Required',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        406 => 'Not Acceptable',
+        407 => 'Proxy Authentication Required',
+        408 => 'Request Timeout',
+        409 => 'Conflict',
+        410 => 'Gone',
+        411 => 'Length Required',
+        412 => 'Precondition Failed',
+        413 => 'Request Entity Too Large',
+        414 => 'Request-URI Too Long',
+        415 => 'Unsupported Media Type',
+        416 => 'Requested Range Not Satisfiable',
+        417 => 'Expectation Failed',
+        418 => 'I\'m a teapot',
+        422 => 'Unprocessable Entity',
+        423 => 'Locked',
+        424 => 'Failed Dependency',
+        426 => 'Upgrade Required',
+        428 => 'Precondition Required',
+        429 => 'Too Many Requests',
+        431 => 'Request Header Fields Too Large',
+        451 => 'Unavailable For Legal Reasons',
         //Server Error 5xx
-        StatusCode::HTTP_INTERNAL_SERVER_ERROR => 'Internal Server Error',
-        StatusCode::HTTP_NOT_IMPLEMENTED => 'Not Implemented',
-        StatusCode::HTTP_BAD_GATEWAY => 'Bad Gateway',
-        StatusCode::HTTP_SERVICE_UNAVAILABLE => 'Service Unavailable',
-        StatusCode::HTTP_GATEWAY_TIMEOUT => 'Gateway Timeout',
-        StatusCode::HTTP_VERSION_NOT_SUPPORTED => 'HTTP Version Not Supported',
-        StatusCode::HTTP_VARIANT_ALSO_NEGOTIATES => 'Variant Also Negotiates',
-        StatusCode::HTTP_INSUFFICIENT_STORAGE => 'Insufficient Storage',
-        StatusCode::HTTP_LOOP_DETECTED => 'Loop Detected',
-        StatusCode::HTTP_NOT_EXTENDED => 'Not Extended',
-        StatusCode::HTTP_NETWORK_AUTHENTICATION_REQUIRED => 'Network Authentication Required',
-        StatusCode::HTTP_NETWORK_CONNECTION_TIMEOUT_ERROR => 'Network Connect Timeout Error',
+        500 => 'Internal Server Error',
+        501 => 'Not Implemented',
+        502 => 'Bad Gateway',
+        503 => 'Service Unavailable',
+        504 => 'Gateway Timeout',
+        505 => 'HTTP Version Not Supported',
+        506 => 'Variant Also Negotiates',
+        507 => 'Insufficient Storage',
+        508 => 'Loop Detected',
+        510 => 'Not Extended',
+        511 => 'Network Authentication Required',
     ];
 
     /**
-     * EOL characters used for HTTP response.
+     * Create new HTTP response.
      *
-     * @var string
-     */
-    const EOL = "\r\n";
-
-    /**
      * @param int                   $status  The response status code.
      * @param HeadersInterface|null $headers The response headers.
      * @param StreamInterface|null  $body    The response body.
      */
-    public function __construct(
-        $status = StatusCode::HTTP_OK,
-        HeadersInterface $headers = null,
-        StreamInterface $body = null
-    ) {
+    public function __construct($status = 200, HeadersInterface $headers = null, StreamInterface $body = null)
+    {
         $this->status = $this->filterStatus($status);
         $this->headers = $headers ? $headers : new Headers();
         $this->body = $body ? $body : new Body(fopen('php://temp', 'r+'));
@@ -148,7 +136,12 @@ class Response extends Message implements ResponseInterface
     public function __clone()
     {
         $this->headers = clone $this->headers;
+        $this->body = clone $this->body;
     }
+
+    /*******************************************************************************
+     * Status
+     ******************************************************************************/
 
     /**
      * Gets the response status code.
@@ -156,7 +149,7 @@ class Response extends Message implements ResponseInterface
      * The status code is a 3-digit integer result code of the server's attempt
      * to understand and satisfy the request.
      *
-     * @return int
+     * @return int Status code.
      */
     public function getStatusCode()
     {
@@ -176,15 +169,12 @@ class Response extends Message implements ResponseInterface
      *
      * @link http://tools.ietf.org/html/rfc7231#section-6
      * @link http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-     *
      * @param int $code The 3-digit integer result code to set.
      * @param string $reasonPhrase The reason phrase to use with the
      *     provided status code; if none is provided, implementations MAY
      *     use the defaults as suggested in the HTTP specification.
-     *
-     * @return static
-     *
-     * @throws InvalidArgumentException For invalid status code arguments.
+     * @return self
+     * @throws \InvalidArgumentException For invalid status code arguments.
      */
     public function withStatus($code, $reasonPhrase = '')
     {
@@ -213,17 +203,12 @@ class Response extends Message implements ResponseInterface
      * Filter HTTP status code.
      *
      * @param  int $status HTTP status code.
-     *
      * @return int
-     *
-     * @throws InvalidArgumentException If an invalid HTTP status code is provided.
+     * @throws \InvalidArgumentException If an invalid HTTP status code is provided.
      */
     protected function filterStatus($status)
     {
-        if (!is_integer($status) ||
-            $status<StatusCode::HTTP_CONTINUE ||
-            $status>StatusCode::HTTP_NETWORK_CONNECTION_TIMEOUT_ERROR
-        ) {
+        if (!is_integer($status) || $status<100 || $status>599) {
             throw new InvalidArgumentException('Invalid HTTP status code');
         }
 
@@ -241,7 +226,6 @@ class Response extends Message implements ResponseInterface
      *
      * @link http://tools.ietf.org/html/rfc7231#section-6
      * @link http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-     *
      * @return string Reason phrase; must return an empty string if none present.
      */
     public function getReasonPhrase()
@@ -255,34 +239,9 @@ class Response extends Message implements ResponseInterface
         return '';
     }
 
-    /**
-     * Return an instance with the provided value replacing the specified header.
-     *
-     * If a Location header is set and the status code is 200, then set the status
-     * code to 302 to mimic what PHP does. See https://github.com/slimphp/Slim/issues/1730
-     *
-     * @param string $name Case-insensitive header field name.
-     * @param string|string[] $value Header value(s).
-     *
-     * @return static
-     *
-     * @throws InvalidArgumentException For invalid header names or values.
-     */
-    public function withHeader($name, $value)
-    {
-        $clone = clone $this;
-        $clone->headers->set($name, $value);
-
-        if ($this->body instanceof NonBufferedBody) {
-            header(sprintf('%s: %s', $name, $clone->getHeaderLine($name)));
-        }
-
-        if ($clone->getStatusCode() === StatusCode::HTTP_OK && strtolower($name) === 'location') {
-            $clone = $clone->withStatus(StatusCode::HTTP_FOUND);
-        }
-
-        return $clone;
-    }
+    /*******************************************************************************
+     * Body
+     ******************************************************************************/
 
     /**
      * Write data to the response body.
@@ -292,8 +251,7 @@ class Response extends Message implements ResponseInterface
      * Proxies to the underlying stream and writes the provided data to it.
      *
      * @param string $data
-     *
-     * @return static
+     * @return self
      */
     public function write($data)
     {
@@ -301,6 +259,10 @@ class Response extends Message implements ResponseInterface
 
         return $this;
     }
+
+    /*******************************************************************************
+     * Response Helpers
+     ******************************************************************************/
 
     /**
      * Redirect.
@@ -311,23 +273,12 @@ class Response extends Message implements ResponseInterface
      * response to the client.
      *
      * @param  string|UriInterface $url    The redirect destination.
-     * @param  int|null            $status The redirect HTTP status code.
-     *
-     * @return static
+     * @param  int                 $status The redirect HTTP status code.
+     * @return self
      */
-    public function withRedirect($url, $status = null)
+    public function withRedirect($url, $status = 302)
     {
-        $responseWithRedirect = $this->withHeader('Location', (string)$url);
-
-        if (is_null($status) && $this->getStatusCode() === StatusCode::HTTP_OK) {
-            $status = StatusCode::HTTP_FOUND;
-        }
-
-        if (!is_null($status)) {
-            return $responseWithRedirect->withStatus($status);
-        }
-
-        return $responseWithRedirect;
+        return $this->withStatus($status)->withHeader('Location', (string)$url);
     }
 
     /**
@@ -338,25 +289,24 @@ class Response extends Message implements ResponseInterface
      * This method prepares the response object to return an HTTP Json
      * response to the client.
      *
-     * @param  mixed $data   The data
-     * @param  int   $status The HTTP status code.
-     * @param  int   $encodingOptions Json encoding options
-     *
-     * @return static
-     *
-     * @throws RuntimeException
+     * @param  mixed  $data   The data
+     * @param  int    $status The HTTP status code.
+     * @param  int    $encodingOptions Json encoding options
+     * @throws \RuntimeException
+     * @return self
      */
     public function withJson($data, $status = null, $encodingOptions = 0)
     {
-        $response = $this->withBody(new Body(fopen('php://temp', 'r+')));
-        $response->body->write($json = json_encode($data, $encodingOptions));
+        $body = $this->getBody();
+        $body->rewind();
+        $body->write($json = json_encode($data, $encodingOptions));
 
         // Ensure that the json encoding passed successfully
         if ($json === false) {
-            throw new RuntimeException(json_last_error_msg(), json_last_error());
+            throw new \RuntimeException(json_last_error_msg(), json_last_error());
         }
 
-        $responseWithJson = $response->withHeader('Content-Type', 'application/json');
+        $responseWithJson = $this->withHeader('Content-Type', 'application/json;charset=utf-8');
         if (isset($status)) {
             return $responseWithJson->withStatus($status);
         }
@@ -372,10 +322,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isEmpty()
     {
-        return in_array(
-            $this->getStatusCode(),
-            [StatusCode::HTTP_NO_CONTENT, StatusCode::HTTP_RESET_CONTENT, StatusCode::HTTP_NOT_MODIFIED]
-        );
+        return in_array($this->getStatusCode(), [204, 205, 304]);
     }
 
     /**
@@ -387,7 +334,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isInformational()
     {
-        return $this->getStatusCode() >= StatusCode::HTTP_CONTINUE && $this->getStatusCode() < StatusCode::HTTP_OK;
+        return $this->getStatusCode() >= 100 && $this->getStatusCode() < 200;
     }
 
     /**
@@ -399,7 +346,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isOk()
     {
-        return $this->getStatusCode() === StatusCode::HTTP_OK;
+        return $this->getStatusCode() === 200;
     }
 
     /**
@@ -411,8 +358,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isSuccessful()
     {
-        return $this->getStatusCode() >= StatusCode::HTTP_OK &&
-            $this->getStatusCode() < StatusCode::HTTP_MULTIPLE_CHOICES;
+        return $this->getStatusCode() >= 200 && $this->getStatusCode() < 300;
     }
 
     /**
@@ -424,16 +370,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isRedirect()
     {
-        return in_array(
-            $this->getStatusCode(),
-            [
-                StatusCode::HTTP_MOVED_PERMANENTLY,
-                StatusCode::HTTP_FOUND,
-                StatusCode::HTTP_SEE_OTHER,
-                StatusCode::HTTP_TEMPORARY_REDIRECT,
-                StatusCode::HTTP_PERMANENT_REDIRECT
-            ]
-        );
+        return in_array($this->getStatusCode(), [301, 302, 303, 307]);
     }
 
     /**
@@ -445,8 +382,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isRedirection()
     {
-        return $this->getStatusCode() >= StatusCode::HTTP_MULTIPLE_CHOICES &&
-            $this->getStatusCode() < StatusCode::HTTP_BAD_REQUEST;
+        return $this->getStatusCode() >= 300 && $this->getStatusCode() < 400;
     }
 
     /**
@@ -455,10 +391,11 @@ class Response extends Message implements ResponseInterface
      * Note: This method is not part of the PSR-7 standard.
      *
      * @return bool
+     * @api
      */
     public function isForbidden()
     {
-        return $this->getStatusCode() === StatusCode::HTTP_FORBIDDEN;
+        return $this->getStatusCode() === 403;
     }
 
     /**
@@ -470,19 +407,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isNotFound()
     {
-        return $this->getStatusCode() === StatusCode::HTTP_NOT_FOUND;
-    }
-
-    /**
-     * Is this a bad request?
-     *
-     * Note: This method is not part of the PSR-7 standard.
-     *
-     * @return bool
-     */
-    public function isBadRequest()
-    {
-        return $this->getStatusCode() === StatusCode::HTTP_BAD_REQUEST;
+        return $this->getStatusCode() === 404;
     }
 
     /**
@@ -494,8 +419,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isClientError()
     {
-        return $this->getStatusCode() >= StatusCode::HTTP_BAD_REQUEST &&
-            $this->getStatusCode() < StatusCode::HTTP_INTERNAL_SERVER_ERROR;
+        return $this->getStatusCode() >= 400 && $this->getStatusCode() < 500;
     }
 
     /**
@@ -507,7 +431,7 @@ class Response extends Message implements ResponseInterface
      */
     public function isServerError()
     {
-        return $this->getStatusCode() >= StatusCode::HTTP_INTERNAL_SERVER_ERROR && $this->getStatusCode() < 600;
+        return $this->getStatusCode() >= 500 && $this->getStatusCode() < 600;
     }
 
     /**
@@ -525,11 +449,11 @@ class Response extends Message implements ResponseInterface
             $this->getStatusCode(),
             $this->getReasonPhrase()
         );
-        $output .= Response::EOL;
+        $output .= PHP_EOL;
         foreach ($this->getHeaders() as $name => $values) {
-            $output .= sprintf('%s: %s', $name, $this->getHeaderLine($name)) . Response::EOL;
+            $output .= sprintf('%s: %s', $name, $this->getHeaderLine($name)) . PHP_EOL;
         }
-        $output .= Response::EOL;
+        $output .= PHP_EOL;
         $output .= (string)$this->getBody();
 
         return $output;

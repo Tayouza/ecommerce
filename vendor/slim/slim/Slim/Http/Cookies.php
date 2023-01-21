@@ -1,15 +1,19 @@
 <?php
 /**
- * Slim Framework (https://slimframework.com)
+ * Slim Framework (http://slimframework.com)
  *
- * @license https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
+ * @link      https://github.com/slimphp/Slim
+ * @copyright Copyright (c) 2011-2016 Josh Lockhart
+ * @license   https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
  */
-
 namespace Slim\Http;
 
 use InvalidArgumentException;
 use Slim\Interfaces\Http\CookiesInterface;
 
+/**
+ * Cookie helper
+ */
 class Cookies implements CookiesInterface
 {
     /**
@@ -38,11 +42,12 @@ class Cookies implements CookiesInterface
         'path' => null,
         'expires' => null,
         'secure' => false,
-        'httponly' => false,
-        'samesite' => null
+        'httponly' => false
     ];
 
     /**
+     * Create new cookies helper
+     *
      * @param array $cookies
      */
     public function __construct(array $cookies = [])
@@ -61,7 +66,12 @@ class Cookies implements CookiesInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get request cookie
+     *
+     * @param  string $name    Cookie name
+     * @param  mixed  $default Cookie default value
+     *
+     * @return mixed Cookie value if present, else default
      */
     public function get($name, $default = null)
     {
@@ -69,7 +79,10 @@ class Cookies implements CookiesInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Set response cookie
+     *
+     * @param string       $name  Cookie name
+     * @param string|array $value Cookie value, or cookie properties
      */
     public function set($name, $value)
     {
@@ -80,7 +93,9 @@ class Cookies implements CookiesInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Convert to `Set-Cookie` headers
+     *
+     * @return string[]
      */
     public function toHeaders()
     {
@@ -126,7 +141,7 @@ class Cookies implements CookiesInterface
         if (isset($properties['secure']) && $properties['secure']) {
             $result .= '; secure';
         }
-
+        
         if (isset($properties['hostonly']) && $properties['hostonly']) {
             $result .= '; HostOnly';
         }
@@ -135,17 +150,18 @@ class Cookies implements CookiesInterface
             $result .= '; HttpOnly';
         }
 
-        if (isset($properties['samesite'])
-            && in_array(strtolower($properties['samesite']), ['lax', 'strict', 'none'], true)) {
-            // While strtolower is needed for correct comparison, the RFC doesn't care about case
-            $result .= '; SameSite=' . $properties['samesite'];
-        }
-
         return $result;
     }
 
     /**
-     * {@inheritdoc}
+     * Parse HTTP request `Cookie:` header and extract
+     * into a PHP associative array.
+     *
+     * @param  string $header The raw HTTP request `Cookie:` header
+     *
+     * @return array Associative array of cookie names and values
+     *
+     * @throws InvalidArgumentException if the cookie data cannot be parsed
      */
     public static function parseHeader($header)
     {
@@ -158,7 +174,7 @@ class Cookies implements CookiesInterface
         }
 
         $header = rtrim($header, "\r\n");
-        $pieces = preg_split('@[;]\s*@', $header);
+        $pieces = preg_split('@\s*[;,]\s*@', $header);
         $cookies = [];
 
         foreach ($pieces as $cookie) {

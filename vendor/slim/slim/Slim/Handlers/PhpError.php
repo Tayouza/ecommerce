@@ -1,28 +1,58 @@
 <?php
 /**
- * Slim Framework (https://slimframework.com)
+ * Slim Framework (http://slimframework.com)
  *
- * @license https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
+ * @link      https://github.com/slimphp/Slim
+ * @copyright Copyright (c) 2011-2016 Josh Lockhart
+ * @license   https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
  */
-
 namespace Slim\Handlers;
 
+use Throwable;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Body;
-use Throwable;
-use UnexpectedValueException;
 
-class PhpError extends AbstractError
+/**
+ * Default Slim application error handler for PHP 7+ Throwables
+ *
+ * It outputs the error message and diagnostic information in either JSON, XML,
+ * or HTML based on the Accept header.
+ */
+class PhpError
 {
+    protected $displayErrorDetails;
+
     /**
-     * @param ServerRequestInterface $request  The most recent Request object
-     * @param ResponseInterface      $response The most recent Response object
-     * @param Throwable              $error    The caught Throwable object
+     * Known handled content types
+     *
+     * @var array
+     */
+    protected $knownContentTypes = [
+        'application/json',
+        'application/xml',
+        'text/xml',
+        'text/html',
+    ];
+
+    /**
+     * Constructor
+     *
+     * @param boolean $displayErrorDetails Set to true to display full details
+     */
+    public function __construct($displayErrorDetails = false)
+    {
+        $this->displayErrorDetails = (bool)$displayErrorDetails;
+    }
+
+    /**
+     * Invoke error handler
+     *
+     * @param ServerRequestInterface $request   The most recent Request object
+     * @param ResponseInterface      $response  The most recent Response object
+     * @param Throwable              $error     The caught Throwable object
      *
      * @return ResponseInterface
-     *
-     * @throws UnexpectedValueException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, Throwable $error)
     {
@@ -40,8 +70,6 @@ class PhpError extends AbstractError
             case 'text/html':
                 $output = $this->renderHtmlErrorMessage($error);
                 break;
-            default:
-                throw new UnexpectedValueException('Cannot render unknown content type ' . $contentType);
         }
 
         $this->writeToErrorLog($error);
@@ -53,6 +81,66 @@ class PhpError extends AbstractError
                 ->withStatus(500)
                 ->withHeader('Content-type', $contentType)
                 ->withBody($body);
+    }
+
+
+    /**
+     * Write to the error log if displayErrorDetails is false
+     *
+     * @param Throwable $error
+     *
+     * @return void
+     */
+    protected function writeToErrorLog($error)
+    {
+        if ($this->displayErrorDetails) {
+            return;
+        }
+
+        $message = 'Slim Application Error:' . PHP_EOL;
+        $message .= $this->renderTextError($error);
+        while ($error = $error->getPrevious()) {
+            $message .= PHP_EOL . 'Previous error:' . PHP_EOL;
+            $message .= $this->renderTextError($error);
+        }
+
+        $message .= PHP_EOL . 'View in rendered output by enabling the "displayErrorDetails" setting.' . PHP_EOL;
+
+        error_log($message);
+    }
+
+    /**
+     * Render error as Text.
+     *
+     * @param Throwable $error
+     *
+     * @return string
+     */
+    protected function renderTextError(Throwable $error)
+    {
+        $text = sprintf('Type: %s' . PHP_EOL, get_class($error));
+
+        if (($code = $error->getCode())) {
+            $text .= sprintf('Code: %s' . PHP_EOL, $code);
+        }
+
+        if (($message = $error->getMessage())) {
+            $text .= sprintf('Message: %s' . PHP_EOL, htmlentities($message));
+        }
+
+        if (($file = $error->getFile())) {
+            $text .= sprintf('File: %s' . PHP_EOL, $file);
+        }
+
+        if (($line = $error->getLine())) {
+            $text .= sprintf('Line: %s' . PHP_EOL, $line);
+        }
+
+        if (($trace = $error->getTraceAsString())) {
+            $text .= sprintf('Trace: %s', $trace);
+        }
+
+        return $text;
     }
 
     /**
@@ -161,8 +249,7 @@ class PhpError extends AbstractError
     /**
      * Render XML error
      *
-     * @param Throwable $error
-     *
+     * @param  Throwable $error
      * @return string
      */
     protected function renderXmlErrorMessage(Throwable $error)
@@ -189,11 +276,28 @@ class PhpError extends AbstractError
      * Returns a CDATA section with the given content.
      *
      * @param  string $content
-     *
      * @return string
      */
     private function createCdataSection($content)
     {
         return sprintf('<![CDATA[%s]]>', str_replace(']]>', ']]]]><![CDATA[>', $content));
+    }
+
+    /**
+     * Determine which content type we know about is wanted using Accept header
+     *
+     * @param ServerRequestInterface $request
+     * @return string
+     */
+    private function determineContentType(ServerRequestInterface $request)
+    {
+        $acceptHeader = $request->getHeaderLine('Accept');
+        $selectedContentTypes = array_intersect(explode(',', $acceptHeader), $this->knownContentTypes);
+
+        if (count($selectedContentTypes)) {
+            return $selectedContentTypes[0];
+        }
+
+        return 'text/html';
     }
 }

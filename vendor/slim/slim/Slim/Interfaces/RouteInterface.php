@@ -1,32 +1,40 @@
 <?php
 /**
- * Slim Framework (https://slimframework.com)
+ * Slim Framework (http://slimframework.com)
  *
- * @license https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
+ * @link      https://github.com/slimphp/Slim
+ * @copyright Copyright (c) 2011-2016 Josh Lockhart
+ * @license   https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
  */
-
 namespace Slim\Interfaces;
 
 use InvalidArgumentException;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
+/**
+ * Route Interface
+ *
+ * @package Slim
+ * @since   3.0.0
+ */
 interface RouteInterface
 {
+
     /**
      * Retrieve a specific route argument
      *
-     * @param string      $name
-     * @param string|null $default
+     * @param string $name
+     * @param mixed $default
      *
-     * @return string|null
+     * @return mixed
      */
     public function getArgument($name, $default = null);
 
     /**
      * Get route arguments
      *
-     * @return string[]
+     * @return array
      */
     public function getArguments();
 
@@ -50,37 +58,25 @@ interface RouteInterface
      * @param string $name
      * @param string $value
      *
-     * @return RouteInterface
+     * @return static
      */
     public function setArgument($name, $value);
 
     /**
      * Replace route arguments
      *
-     * @param string[] $arguments
+     * @param array $arguments
      *
-     * @return RouteInterface
+     * @return static
      */
     public function setArguments(array $arguments);
-
-    /**
-     * Set output buffering mode
-     *
-     * One of: false, 'prepend' or 'append'
-     *
-     * @param boolean|string $mode
-     *
-     * @throws InvalidArgumentException If an unknown buffering mode is specified
-     */
-    public function setOutputBuffering($mode);
 
     /**
      * Set route name
      *
      * @param string $name
      *
-     * @return RouteInterface
-     *
+     * @return static
      * @throws InvalidArgumentException if the route name is not a string
      */
     public function setName($name);
@@ -100,7 +96,7 @@ interface RouteInterface
      * Prepare the route for use
      *
      * @param ServerRequestInterface $request
-     * @param array                  $arguments
+     * @param array $arguments
      */
     public function prepare(ServerRequestInterface $request, array $arguments);
 
@@ -112,8 +108,7 @@ interface RouteInterface
      * back to the Application.
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface      $response
-     *
+     * @param ResponseInterface $response
      * @return ResponseInterface
      */
     public function run(ServerRequestInterface $request, ResponseInterface $response);

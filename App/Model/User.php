@@ -3,7 +3,7 @@
 namespace App\Model;
 
 use App\Class\Mailer;
-use App\Db\Sql;
+use App\DB\Sql;
 use App\Model\Model;
 use Exception;
 

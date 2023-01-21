@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-use App\Db\Sql;
+use App\DB\Sql;
 use App\Model\Model;
 
 class Category extends Model
