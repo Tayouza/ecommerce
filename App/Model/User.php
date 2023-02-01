@@ -13,6 +13,13 @@ class User extends Model
     const CIPHER = "AES-128-CBC";
     const SECRET = "TayouzaDev_secret";
 
+    private Sql $sql;
+
+    public function __construct()
+    {
+        $this->sql = new Sql();
+    }
+
     public static function login($login, $pass)
     {
         $sql = new Sql();
@@ -87,7 +94,6 @@ class User extends Model
 
     public function save()
     {
-        $sql = new Sql();
         /*
         pdesperson VARCHAR(64),
         pdeslogin VARCHAR(64),
@@ -96,7 +102,7 @@ class User extends Model
         pdesnrphone BIGINT,
         pdesinadmin TINYINT,
         */
-        $results = $sql->selectQuery("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
+        $results = $this->sql->selectQuery("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
             ":desperson" => $this->getdesperson(),
             ":deslogin" => $this->getdeslogin(),
             ":despassword" => password_hash($this->getdespassword(), PASSWORD_BCRYPT, array("cost" => 12)),
@@ -110,9 +116,7 @@ class User extends Model
 
     public function get($iduser)
     {
-        $sql = new Sql();
-
-        $results = $sql->selectQuery(
+        $results = $this->sql->selectQuery(
             "   SELECT * FROM tb_users users 
                 INNER JOIN tb_persons persons
                 USING(idperson) 
@@ -127,7 +131,6 @@ class User extends Model
 
     public function update()
     {
-        $sql = new Sql();
         /*
         pdesperson VARCHAR(64),
         pdeslogin VARCHAR(64),
@@ -136,7 +139,7 @@ class User extends Model
         pdesnrphone BIGINT,
         pdesinadmin TINYINT,
         */
-        $results = $sql->selectQuery("CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
+        $results = $this->sql->selectQuery("CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
             ":iduser" => $this->getiduser(),
             ":desperson" => $this->getdesperson(),
             ":deslogin" => $this->getdeslogin(),
@@ -151,9 +154,7 @@ class User extends Model
 
     public function delete()
     {
-        $sql = new Sql();
-
-        $sql->runQuery("Call sp_users_delete(:iduser)", array(
+        $this->sql->runQuery("Call sp_users_delete(:iduser)", array(
             ":iduser" => $this->getiduser()
         ));
     }
@@ -161,6 +162,7 @@ class User extends Model
     public static function getForgot($email)
     {
         $sql = new Sql();
+
         $results = $sql->selectQuery("   SELECT * FROM tb_persons persons
                                         INNER JOIN tb_users users
                                         USING(idperson)
@@ -280,15 +282,14 @@ class User extends Model
 
     public function setPassword($pass)
     {
-        $sql = new Sql();
         $passHash = password_hash($pass, PASSWORD_BCRYPT, array("cost" => 12));
 
-        $sql->runQuery("UPDATE tb_users 
-                        SET despassword = :PASS 
-                        WHERE iduser = :IDUSER",
-                        array(
-                            ":PASS"=>$passHash,
-                            ":IDUSER"=>$this->getiduser()
-                        ));
+        $this->sql->runQuery("UPDATE tb_users 
+                              SET despassword = :PASS 
+                              WHERE iduser = :IDUSER",
+                              array(
+                                  ":PASS"=>$passHash,
+                                  ":IDUSER"=>$this->getiduser()
+                              ));
     }
 }

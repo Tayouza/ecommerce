@@ -7,6 +7,12 @@ use App\Model\Model;
 
 class Category extends Model
 {
+    private Sql $sql;
+
+    public function __construct()
+    {
+        $this->sql = new Sql();
+    }
 
     public static function listAll()
     {
@@ -17,24 +23,19 @@ class Category extends Model
 
     public function save()
     {
-        
-        $sql = new Sql();
-        
-        $results = $sql->selectQuery("CALL sp_categories_save(:IDCATEGORY, :DESCATEGORY)", array(
+        $results = $this->sql->selectQuery("CALL sp_categories_save(:IDCATEGORY, :DESCATEGORY)", array(
             ":IDCATEGORY" => $this->getidcategory(),
             ":DESCATEGORY" => $this->getdescategory()
         ));
 
         $this->setData($results[0]);
         
-        Category::updateFile();
+        self::updateFile();
     }
 
     public function get($idCategory)
     {
-        $sql = new Sql();
-
-        $results = $sql->selectQuery("SELECT * FROM tb_categories WHERE idcategory = :IDCATEGORY", array(
+        $results = $this->sql->selectQuery("SELECT * FROM tb_categories WHERE idcategory = :IDCATEGORY", array(
             ":IDCATEGORY"=>$idCategory
         ));
         
@@ -43,23 +44,21 @@ class Category extends Model
 
     public function delete($idCategory)
     {
-        $sql = new Sql();
-
-        $sql->runQuery("DELETE FROM tb_categories WHERE idcategory = :IDCATEGORY", array(
+        $this->sql->runQuery("DELETE FROM tb_categories WHERE idcategory = :IDCATEGORY", array(
             ":IDCATEGORY"=>$idCategory
         ));
 
-        Category::updateFile();
+        self::updateFile();
     }
 
     public static function updateFile()
     {
-        $categories = Category::listAll();
+        $categories = self::listAll();
 
         $html = array();
 
         foreach($categories as $row){
-            array_push($html, "<li><a href='/category/{$row['idcategory']}'>{$row['descategory']}</a></li>".PHP_EOL);
+            array_push($html, "<li><a href='/categories/{$row['idcategory']}'>{$row['descategory']}</a></li>".PHP_EOL);
         }
 
         $path = $_SERVER['DOCUMENT_ROOT'].
@@ -73,10 +72,8 @@ class Category extends Model
 
     public function getProducts($related = true)
     {
-        $sql = new Sql();
-
         if($related === true){
-            return $sql->selectQuery("  SELECT * FROM tb_products
+            return $this->sql->selectQuery("  SELECT * FROM tb_products
                                         WHERE idproduct IN(
                                             SELECT a.idproduct
                                             FROM tb_products a
@@ -91,7 +88,7 @@ class Category extends Model
                                 );
         }else{
             
-            return $sql->selectQuery("  SELECT * FROM tb_products
+            return $this->sql->selectQuery("  SELECT * FROM tb_products
                                         WHERE idproduct NOT IN(
                                             SELECT a.idproduct
                                             FROM tb_products a
@@ -109,9 +106,7 @@ class Category extends Model
 
     public function addProduct(Product $product)
     {
-        $sql = new Sql();
-
-        $sql->runQuery("INSERT INTO tb_productscategories(idcategory, idproduct) 
+        $this->sql->runQuery("INSERT INTO tb_productscategories(idcategory, idproduct) 
                         VALUES(:IDCATEGORY, :IDPRODUCT)",
                         array(
                             ':IDCATEGORY'=>$this->getidcategory(),
@@ -121,9 +116,7 @@ class Category extends Model
 
     public function removeProduct(Product $product)
     {
-        $sql = new Sql();
-
-        $sql->runQuery("DELETE FROM tb_productscategories WHERE idcategory = :IDCATEGORY AND idproduct = :IDPRODUCT",
+        $this->sql->runQuery("DELETE FROM tb_productscategories WHERE idcategory = :IDCATEGORY AND idproduct = :IDPRODUCT",
                         array(
                             ':IDCATEGORY'=>$this->getidcategory(),
                             ':IDPRODUCT'=>$product->getidproduct()

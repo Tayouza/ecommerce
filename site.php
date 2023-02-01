@@ -15,9 +15,9 @@ $app->get('/', function (Request $req, Response $res, $args) {
     ));
 });
 
-$app->get('/carrinho', function (Request $req, Response $res, $args) {
+$app->get('/cart', function (Request $req, Response $res, $args) {
     $page = new Page();
-    $page->setTpl('carrinho');
+    $page->setTpl('cart');
 });
 
 $app->get("/login", function (Request $req, Response $res, $args) {
@@ -25,22 +25,22 @@ $app->get("/login", function (Request $req, Response $res, $args) {
     $page->setTpl('login');
 });
 
-$app->get("/esqueci", function (Request $req, Response $res, $args) {
+$app->get("/forget", function (Request $req, Response $res, $args) {
     $page = new Page();
-    $page->setTpl('esqueci');
+    $page->setTpl('forget');
 });
 
-$app->get("/pagamento", function (Request $req, Response $res, $args) {
+$app->get("/payment", function (Request $req, Response $res, $args) {
     $page = new Page();
-    $page->setTpl('pagamento');
+    $page->setTpl('payment');
 });
 
-$app->get("/lista-produtos", function (Request $req, Response $res, $args) {
+$app->get("/products", function (Request $req, Response $res, $args) {
     $page = new Page();
-    $page->setTpl('lista-produtos');
+    $page->setTpl('products');
 });
 
-$app->get("/categoria/{id}", function (Request $req, Response $res, $args)
+$app->get("/categories/{id}", function (Request $req, Response $res, $args)
 {
     $idCategory = $args['id'];
 
@@ -61,11 +61,11 @@ $app->get("/products/{desurl}", function(Request $req, Response $res, $args){
     $product = new Product();
 
     $product->getFromUrl($args['desurl']);
-
+    
     $page = new Page();
 
-    $page->setTpl("detalhes-produto", [
+    $page->setTpl("product-detail", [
         'product'    => $product->getValues(),
-        'categories' => []
+        'categories' => $product->getCategories(),
     ]);
 });

@@ -8,6 +8,12 @@ use Exception;
 
 class Product extends Model
 {
+    private Sql $sql;
+
+    public function __construct()
+    {
+        $this->sql = new Sql();
+    }
 
     public static function listAll()
     {
@@ -29,10 +35,7 @@ class Product extends Model
 
     public function save()
     {
-
-        $sql = new Sql();
-
-        $results = $sql->selectQuery(
+        $results = $this->sql->selectQuery(
             "  CALL sp_products_save(
                 :IDPRODUCT, 
                 :DESPRODUCT, 
@@ -59,9 +62,7 @@ class Product extends Model
 
     public function get($idProduct)
     {
-        $sql = new Sql();
-
-        $results = $sql->selectQuery("SELECT * FROM tb_products WHERE idproduct = :IDPRODUCT", array(
+        $results = $this->sql->selectQuery("SELECT * FROM tb_products WHERE idproduct = :IDPRODUCT", array(
             ":IDPRODUCT" => $idProduct
         ));
 
@@ -70,9 +71,7 @@ class Product extends Model
 
     public function delete($idProduct)
     {
-        $sql = new Sql();
-
-        $sql->runQuery("DELETE FROM tb_products WHERE idproduct = :IDPRODUCT", array(
+        $this->sql->runQuery("DELETE FROM tb_products WHERE idproduct = :IDPRODUCT", array(
             ":IDPRODUCT" => $idProduct
         ));
     }
@@ -148,12 +147,20 @@ class Product extends Model
 
     public function getFromUrl($desurl)
     {
-        $sql = new Sql();
-
-        $result = $sql->selectQuery("SELECT * FROM tb_products WHERE desurl = :DESURL LIMIT 1", [
+        $result = $this->sql->selectQuery("SELECT * FROM tb_products WHERE desurl = :DESURL LIMIT 1", [
             ':DESURL' => $desurl
         ]);
 
-        $this->setData($result);
+        $this->setData($result[0]);
+    }
+
+    public function getCategories()
+    {
+        return $this->sql->selectQuery('SELECT * FROM tb_categories as cat 
+                                                INNER JOIN tb_productscategories as prodcat
+                                                ON cat.idcategory = prodcat.idcategory
+                                                WHERE prodcat.idproduct = :IDPRODUCT', [
+                                                    ':IDPRODUCT' => $this->getidproduct()
+                                                ]);
     }
 }
