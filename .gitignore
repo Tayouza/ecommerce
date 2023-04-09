@@ -2,3 +2,4 @@
 /public/App/views-cache/*
 /vendor/*
 .env
+/.history

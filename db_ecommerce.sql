@@ -348,7 +348,7 @@ CREATE TABLE `tb_users` (
 --
 
 INSERT INTO `tb_users` (`iduser`, `idperson`, `deslogin`, `despassword`, `inadmin`, `dtregister`) VALUES
-(1, 1, 'admin', '$2y$12$c9Oqd7U6KgmzuoahUOmanubpvlbIAPNHNLv/2djmlYiPx9KYoVFyO', 1, '2017-03-13 06:00:00'),
+(1, 1, 'admin', '$2y$10$EZOdWm1wUbmhjSFB7YKOaudvf5PA3P8d3cvJsDYsgUfjFlMpSF6fG', 1, '2017-03-13 06:00:00'),
 (2, 16, 'ruth', '$2y$12$JwoAPLqWUbFl7puXrtbsNey4KLMaIMzyDeHiUBFB5V2dL5UX8U31K', 1, '2022-08-13 23:26:04');
 
 -- --------------------------------------------------------
